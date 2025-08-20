@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires,@typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-require-imports */
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('Server', () => {
