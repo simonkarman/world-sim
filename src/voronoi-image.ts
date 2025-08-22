@@ -7,7 +7,7 @@ export function getNeighboringSites(site: Site): Site[] {
   const neighbors = new Set<Site>();
 
   site.edges.forEach(edge => {
-    if (edge.opposite && edge.opposite.site.center.x !== Infinity) {
+    if (edge.opposite) {
       neighbors.add(edge.opposite.site);
     }
   });

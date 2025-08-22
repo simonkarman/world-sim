@@ -1,6 +1,7 @@
-import { deserializeVoronoi, Point, serializeVoronoi, voronoi } from './voronoi';
+import { Point, voronoi } from './voronoi';
 import { generateVoronoiPNG, getNeighboringSites, saveVoronoiDiagram } from './voronoi-image';
 import fs from 'fs';
+import { VoronoiSerializer } from './voronoi-serializer';
 
 export async function example() {
   const points: Point[] = [
@@ -33,8 +34,7 @@ export async function example() {
 
       // Print edge details (only first few to avoid clutter)
       site.edges.slice(0, 2).forEach((edge, edgeIndex) => {
-        const isConnectedToSite = edge.opposite && edge.opposite.site && edge.opposite.site.center.x !== Infinity;
-        const connInfo = isConnectedToSite ? 'to site' : 'to boundary';
+        const connInfo = edge.opposite ? 'to site' : 'to boundary';
         console.log(`    Edge ${edgeIndex}: from (${edge.from.x.toFixed(2)}, ${edge.from.y.toFixed(2)}) ${connInfo}`);
       });
       if (site.edges.length > 2) {
@@ -87,9 +87,10 @@ export async function example() {
     console.log('PNG generation complete!');
 
     console.info('Serializing Voronoi diagram...');
-    const serializedVoronoi = JSON.stringify(serializeVoronoi(sites), undefined, 2);
+    const voronoiSerializer = new VoronoiSerializer();
+    const serializedVoronoi = JSON.stringify(voronoiSerializer.serialize(sites), undefined, 2);
     fs.writeFileSync('output/voronoi_serialized.json', serializedVoronoi);
-    const deserializedVoronoi = deserializeVoronoi(JSON.parse(serializedVoronoi));
+    const deserializedVoronoi = voronoiSerializer.deserialize(JSON.parse(serializedVoronoi));
     await saveVoronoiDiagram(deserializedVoronoi, 'output/voronoi_basic_after_serialization.png', 500, 400);
     console.info('Deserialized Voronoi diagram successfully');
 
