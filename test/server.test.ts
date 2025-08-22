@@ -1,16 +1,15 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { Server } from 'node:http';
+import { expect, test } from 'vitest';
+import { app } from '../src/server';
+import { AddressInfo } from 'node:net';
 
-describe('Server', () => {
-  it('runs', async () => {
-    // eslint-disable-next-line no-process-env
-    process.env.PORT = '12876';
-    const server = require('../src/server').default;
-    await sleep(500);
-    const response = await fetch('http://localhost:12876/health');
-    expect(response.status).toBe(200);
-    expect(await response.text()).toBe('OK');
-    await sleep(500);
-    await server();
+test('server starts and responds to GET request on the health endpoint with OK', async () => {
+  const server = await new Promise<Server>((res) => {
+    const srv = app.listen(0, () => res(srv));
   });
+  const address = server.address() as AddressInfo;
+  const response = await fetch(`http://localhost:${address.port}/health`);
+  expect(response.status).toBe(200);
+  expect(await response.text()).toBe('OK');
+  server.close();
 });
