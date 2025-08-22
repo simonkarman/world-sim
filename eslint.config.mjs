@@ -51,7 +51,7 @@ export default defineConfig([
         variables: true,
       }],
 
-      'no-process-env': 'error',
+      'no-process-env': 'off',
       'no-await-in-loop': 'off',
       'prefer-destructuring': 'off',
       'import/prefer-default-export': 'off',

@@ -1,5 +1,6 @@
 import express, { json } from 'express';
 import { example } from './example';
+import { AddressInfo } from 'node:net';
 
 export const app = express();
 app.use(json());
@@ -14,9 +15,10 @@ app.post('/voronoi/generate', async (_, res) => {
   res.send('Voronoi diagram generated successfully');
 });
 
-// eslint-disable-next-line no-process-env
+// Start listening
 if (process.env.NODE_ENV !== 'test') {
-  // Start listening
-  // eslint-disable-next-line no-process-env
-  app.listen(process.env.PORT || 8000);
+  const server = app.listen(process.env.PORT || 8000, () => {
+    const address = server.address() as AddressInfo;
+    console.info(`Server is running on port ${address.port}`);
+  });
 }

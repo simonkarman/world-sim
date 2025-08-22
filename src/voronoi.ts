@@ -49,6 +49,7 @@ export function voronoi(points: Point[], bounds?: [number, number, number, numbe
   const halfEdgeMap = new Map<string, HalfEdge>();
 
   // Process each Voronoi cell to extract edges
+  let numberOfEdges = 0;
   for (let i = 0; i < points.length; i++) {
     const cell = voronoi.cellPolygon(i);
     if (!cell || cell.length === 0) continue;
@@ -69,17 +70,30 @@ export function voronoi(points: Point[], bounds?: [number, number, number, numbe
 
       // Create half-edge
       const halfEdge: HalfEdge = {
-        id: halfEdgeMap.size,
+        id: numberOfEdges,
         site: site,
         from: from,
         next: null as unknown as HalfEdge, // Will be set later
         opposite: oppositeHalfEdge,
       };
 
+      // Link opposite half-edges, or save it for linking later
+      if (oppositeHalfEdge) {
+        oppositeHalfEdge.opposite = halfEdge;
+        halfEdgeMap.delete(reverseKey);
+      } else {
+        halfEdgeMap.set(edgeKey, halfEdge);
+      }
+
       // Store this half-edge
-      halfEdgeMap.set(edgeKey, halfEdge);
       site.edges.push(halfEdge);
+      numberOfEdges += 1;
     }
+  }
+
+  // Verify opposite half-edges are correctly linked
+  if (halfEdgeMap.size !== 0) {
+    console.warn(`Warning: ${halfEdgeMap.size} half-edges without opposites remain unlinked.`);
   }
 
   // For each site, link the half-edges in a circular manner
@@ -93,7 +107,7 @@ export function voronoi(points: Point[], bounds?: [number, number, number, numbe
   return sites;
 }
 
-export type SerializableHalfEdge = [/*id*/number, /*from.x*/number, /*from.y*/number, /*oppositeId*/number | undefined];
+export type SerializableHalfEdge = [/*id*/number, /*from.x*/number, /*from.y*/number] | [number, number, number, /*oppositeId*/number];
 export type SerializableSite = {
   center: Point;
   edges: SerializableHalfEdge[];
@@ -102,7 +116,13 @@ export type SerializableSite = {
 export function serializeVoronoi(sites: Site[]): SerializableSite[] {
   return sites.map(site => ({
     center: site.center,
-    edges: site.edges.map(edge => [edge.id, edge.from.x, edge.from.y, edge.opposite?.id]),
+    edges: site.edges.map(edge => {
+      const s = [edge.id, edge.from.x, edge.from.y] as SerializableHalfEdge;
+      if (edge.opposite !== undefined) {
+        s.push(edge.opposite.id);
+      }
+      return s;
+    }),
   }));
 }
 
