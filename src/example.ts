@@ -1,5 +1,5 @@
 import { Point, voronoi } from './voronoi';
-import { generateVoronoiPNG, getNeighboringSites, saveVoronoiDiagram } from './voronoi-image';
+import { generateCustomVoronoiPNG, generateVoronoiPNG, getNeighboringSites } from './voronoi-image';
 import fs from 'fs';
 import { VoronoiSerializer } from './voronoi-serializer';
 
@@ -49,11 +49,17 @@ export async function example() {
     // Create output directory if it doesn't exist
     fs.mkdirSync('output', { recursive: true });
 
+    // Save buffer to file
+    const saveAs = (filename: string, buffer: Buffer) => {
+      fs.writeFileSync(filename, buffer);
+      console.log(`Voronoi diagram saved to ${filename}`);
+    };
+
     // Basic diagram
-    await saveVoronoiDiagram(sites, 'output/voronoi_basic.png', 500, 400);
+    saveAs('output/voronoi_basic.png', await generateVoronoiPNG(sites, 500, 400));
 
     // Custom styled diagram
-    await generateVoronoiPNG(sites, 'output/voronoi_custom.png', {
+    saveAs('output/voronoi_custom.png', await generateCustomVoronoiPNG(sites, {
       width: 500,
       height: 400,
       backgroundColor: '#1a1a1a',
@@ -68,10 +74,10 @@ export async function example() {
       showSites: true,
       showEdges: true,
       fillCells: true,
-    });
+    }));
 
     // Edge-only diagram
-    await generateVoronoiPNG(sites, 'output/voronoi_edges_only.png', {
+    saveAs('output/voronoi_edges_only.png', await generateCustomVoronoiPNG(sites, {
       width: 500,
       height: 400,
       backgroundColor: '#ffffff',
@@ -82,7 +88,7 @@ export async function example() {
       showSites: true,
       showEdges: true,
       fillCells: false,
-    });
+    }));
 
     console.log('PNG generation complete!');
 
@@ -91,7 +97,7 @@ export async function example() {
     const serializedVoronoi = JSON.stringify(voronoiSerializer.serialize(sites), undefined, 2);
     fs.writeFileSync('output/voronoi_serialized.json', serializedVoronoi);
     const deserializedVoronoi = voronoiSerializer.deserialize(JSON.parse(serializedVoronoi));
-    await saveVoronoiDiagram(deserializedVoronoi, 'output/voronoi_basic_after_serialization.png', 500, 400);
+    saveAs('output/voronoi_basic_after_serialization.png', await generateVoronoiPNG(deserializedVoronoi, 500, 400));
     console.info('Deserialized Voronoi diagram successfully');
 
     return sites;

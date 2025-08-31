@@ -1,5 +1,4 @@
 import { createCanvas } from 'canvas';
-import fs from 'fs';
 import { Site } from './voronoi';
 
 // Utility function to find neighboring sites
@@ -28,14 +27,14 @@ interface VoronoiImageConfig {
   showSites?: boolean;
   showEdges?: boolean;
   fillCells?: boolean;
+  worldToImageSpace?: (point: { x: number; y: number }) => [number, number];
 }
 
 // Utility function to generate PNG image of Voronoi diagram
-export async function generateVoronoiPNG(
+export async function generateCustomVoronoiPNG(
   sites: Site[],
-  filename: string,
   config: VoronoiImageConfig,
-): Promise<void> {
+): Promise<Buffer> {
   const {
     width,
     height,
@@ -51,6 +50,7 @@ export async function generateVoronoiPNG(
     showSites = true,
     showEdges = true,
     fillCells = true,
+    worldToImageSpace = (point) => [point.x, point.y],
   } = config;
 
   // Create canvas
@@ -71,11 +71,11 @@ export async function generateVoronoiPNG(
 
       // Start from the first edge's from point
       const firstEdge = site.edges[0];
-      ctx.moveTo(firstEdge.from.x, firstEdge.from.y);
+      ctx.moveTo(...worldToImageSpace(firstEdge.from));
 
       // Draw edges in order
       site.edges.slice(1).forEach(edge => {
-        ctx.lineTo(edge.from.x, edge.from.y);
+        ctx.lineTo(...worldToImageSpace(edge.from));
       });
 
       ctx.closePath();
@@ -94,15 +94,9 @@ export async function generateVoronoiPNG(
     sites.forEach(site => {
       site.edges.forEach((edge, i) => {
         if (edge.opposite) {
-          const fromX = edge.from.x;
-          const fromY = edge.from.y;
-
-          const toX = edge.next.from.x;
-          const toY = edge.next.from.y;
-
           ctx.beginPath();
-          ctx.moveTo(fromX, fromY);
-          ctx.lineTo(toX, toY);
+          ctx.moveTo(...worldToImageSpace(edge.from));
+          ctx.lineTo(...worldToImageSpace(edge.next.from));
           ctx.stroke();
         }
       });
@@ -114,25 +108,22 @@ export async function generateVoronoiPNG(
     ctx.fillStyle = siteColor;
     sites.forEach(site => {
       ctx.beginPath();
-      ctx.arc(site.center.x, site.center.y, siteRadius, 0, 2 * Math.PI);
+      ctx.arc(...worldToImageSpace(site.center), siteRadius, 0, 2 * Math.PI);
       ctx.fill();
     });
   }
 
   // Save to file
-  const buffer = canvas.toBuffer('image/png');
-  fs.writeFileSync(filename, buffer);
-  console.log(`Voronoi diagram saved to ${filename}`);
+  return canvas.toBuffer('image/png');
 }
 
 // Convenience function with default settings
-export async function saveVoronoiDiagram(
+export async function generateVoronoiPNG(
   sites: Site[],
-  filename: string,
   width: number = 800,
   height: number = 600,
-): Promise<void> {
-  await generateVoronoiPNG(sites, filename, {
+): Promise<Buffer> {
+  return generateCustomVoronoiPNG(sites, {
     width,
     height,
     showSites: true,
