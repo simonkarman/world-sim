@@ -1,13 +1,30 @@
-import express, { json } from 'express';
-import { example } from './example';
 import { AddressInfo } from 'node:net';
+import { createServer as createHttpServer } from 'node:http';
+import express, { json } from 'express';
 import { z } from 'zod';
-import { generateCustomVoronoiPNG } from './voronoi-image';
+import { example } from './voronoi/example';
+import { generateCustomVoronoiPNG } from './voronoi/voronoi-image';
 import { World } from './world/world';
+import { createServer } from '@krmx/server';
+
+const httpServer = createHttpServer();
 
 const world = new World('abc');
 export const app = express();
 app.use(json());
+httpServer.on('request', app);
+
+const krmxServer = createServer({
+  http: {
+    server: httpServer,
+    path: '/krmx',
+  },
+});
+
+krmxServer.on('listen', () => {
+  const address = httpServer.address() as AddressInfo;
+  console.info(`Server is running on port ${address.port}`);
+});
 
 // Health Endpoint
 app.get('/health', (_, res) => {
@@ -55,8 +72,14 @@ app.post('/voronoi/generate', async (_, res) => {
 
 if (process.env.NODE_ENV !== 'test') {
   // Start listening
-  const server = app.listen(process.env.PORT || 8000, () => {
-    const address = server.address() as AddressInfo;
-    console.info(`Server is running on port ${address.port}`);
-  });
+  let port = 8000;
+  try {
+    const portAsNumber = Number(process.env.PORT);
+    if (!isNaN(portAsNumber) && portAsNumber > 0 && portAsNumber < 65536) {
+      port = portAsNumber;
+    }
+  } catch {
+    // ignore invalid port
+  }
+  krmxServer.listen(port);
 }

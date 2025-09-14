@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { voronoi } from '../src/voronoi';
+import { voronoi } from '../src/voronoi/voronoi';
 
 test('voronoi generates sites with connected half edges and boundaries', async () => {
   const points = [{ x: 100, y: 100 }, { x: 200, y: 150 }, { x: 150, y: 250 }];

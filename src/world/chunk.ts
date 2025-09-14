@@ -1,5 +1,5 @@
-import { Random } from '../random';
-import { Point, Site, voronoi } from '../voronoi';
+import { Random } from '../utils/random';
+import { Point, Site, voronoi } from '../voronoi/voronoi';
 import { World } from './world';
 
 export class Chunk {

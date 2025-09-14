@@ -1,6 +1,6 @@
 import { createCanvas } from 'canvas';
 import { Site } from './voronoi';
-import { Chunk } from './world/chunk';
+import { Chunk } from '../world/chunk';
 
 // Utility function to find neighboring sites
 export function getNeighboringSites(site: Site): Site[] {
