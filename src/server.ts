@@ -10,11 +10,11 @@ import { createServer } from '@krmx/server';
 const httpServer = createHttpServer();
 
 const world = new World('abc');
-export const app = express();
+const app = express();
 app.use(json());
 httpServer.on('request', app);
 
-const krmxServer = createServer({
+export const krmxServer = createServer({
   http: {
     server: httpServer,
     path: '/krmx',
