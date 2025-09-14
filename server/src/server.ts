@@ -30,7 +30,6 @@ krmxServer.on('listen', () => {
 
 // Track users and stream their location and loaded chunks
 interface UserData {
-  username: string;
   location: Point;
   loadedChunkKeys: `${number}/${number}`[];
 }
@@ -73,12 +72,14 @@ const reloadChunks = (username: string) => {
 
 krmxServer.on('join', (username) => {
   users[username] = {
-    username,
     location: { x: 0, y: 0 },
     loadedChunkKeys: [],
   };
 });
 krmxServer.on('link', (username) => {
+  Object.entries(users).forEach(([otherUsername, userData]) => {
+    krmxServer.send(username, { type: 'user/moved', payload: { username: otherUsername, location: userData.location } });
+  });
   reloadChunks(username);
 });
 krmxServer.on('unlink', (username) => {

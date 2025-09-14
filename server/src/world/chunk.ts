@@ -75,7 +75,7 @@ export class Chunk {
 
       const iterations = 2;
       for (let i = 0; i < iterations; i++) {
-        const diagram = voronoi(points, [this.x - 1, this.y - 1, 3, 3]);
+        const diagram = voronoi(points);
         points = diagram.map(s => Chunk.computeSiteCenter(s));
       }
 
@@ -86,7 +86,7 @@ export class Chunk {
   getSites(): Site[] {
     return this.asCache('sites', () => {
       const points = this.flatMapSurroundings(c => c.getLloydRelaxedPoints());
-      return voronoi(points, [this.x - 1, this.y - 1, 3, 3]).filter(site => {
+      return voronoi(points).filter(site => {
         return this.isInside(site.location);
       });
     });

@@ -6,18 +6,24 @@ import { Connect } from '@/component/connect';
 export function Login() {
   const [confirmed, setConfirmed] = useState(false);
   const [username, setUsername] = useState('');
+  const [failureReason, setFailureReason] = useState<string | undefined>(undefined);
 
   if (confirmed) {
-    return <Connect username={username} />;
+    return <Connect username={username} failure={(reason) => {
+      setConfirmed(false);
+      setFailureReason(reason);
+    }} />;
   }
 
   return <form
     className="p-3"
     onSubmit={(e) => {
+      setFailureReason(undefined);
       setConfirmed(true);
       e.preventDefault();
     }}
   >
+    {failureReason && <p className="mb-2 text-red-500">Error: {failureReason}</p>}
     <input
       type="text"
       value={username}
