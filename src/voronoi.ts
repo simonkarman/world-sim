@@ -2,15 +2,15 @@ import { Delaunay } from 'd3-delaunay';
 
 export type Point = { x: number, y: number };
 export type HalfEdge = { id: number, site: Site, from: Point, next: HalfEdge, opposite?: HalfEdge };
-export type Site = { center: Point, edges: HalfEdge[] };
+export type Site = { location: Point, edges: HalfEdge[] };
 
 // Helper function to create a key for half-edge pairing
 function createEdgeKey(from: Point, to: Point): string {
   // Round to avoid floating point precision issues
-  const fx = Math.round(from.x * 1000) / 1000;
-  const fy = Math.round(from.y * 1000) / 1000;
-  const tx = Math.round(to.x * 1000) / 1000;
-  const ty = Math.round(to.y * 1000) / 1000;
+  const fx = Math.round(from.x * 10000) / 10000;
+  const fy = Math.round(from.y * 10000) / 10000;
+  const tx = Math.round(to.x * 10000) / 10000;
+  const ty = Math.round(to.y * 10000) / 10000;
   return `${fx},${fy}->${tx},${ty}`;
 }
 
@@ -40,8 +40,8 @@ export function voronoi(points: Point[], bounds?: [number, number, number, numbe
   }
 
   // Create sites array - map original points to sites
-  const sites: Site[] = points.map((center) => ({
-    center: { x: center.x, y: center.y }, // Create new point objects
+  const sites: Site[] = points.map((location) => ({
+    location: { x: location.x, y: location.y }, // Create new point objects
     edges: [],
   }));
 
@@ -62,10 +62,8 @@ export function voronoi(points: Point[], bounds?: [number, number, number, numbe
       const from = { x: cell[j][0], y: cell[j][1] };
       const to = { x: cell[(j + 1) % cell.length][0], y: cell[(j + 1) % cell.length][1] };
 
-      const edgeKey = createEdgeKey(from, to);
-      const reverseKey = createEdgeKey(to, from);
-
       // Check if the opposite half-edge already exists
+      const reverseKey = createEdgeKey(to, from);
       const oppositeHalfEdge = halfEdgeMap.get(reverseKey);
 
       // Create half-edge
@@ -82,6 +80,7 @@ export function voronoi(points: Point[], bounds?: [number, number, number, numbe
         oppositeHalfEdge.opposite = halfEdge;
         halfEdgeMap.delete(reverseKey);
       } else {
+        const edgeKey = createEdgeKey(from, to);
         halfEdgeMap.set(edgeKey, halfEdge);
       }
 
@@ -93,6 +92,7 @@ export function voronoi(points: Point[], bounds?: [number, number, number, numbe
 
   // Verify opposite half-edges are correctly linked
   if (halfEdgeMap.size !== 0) {
+    // TODO: only make this a warning in case of the other half is lying in the bounds
     console.warn(`Warning: ${halfEdgeMap.size} half-edges without opposites remain unlinked.`);
   }
 

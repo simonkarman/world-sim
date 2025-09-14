@@ -1,5 +1,6 @@
 import { createCanvas } from 'canvas';
 import { Site } from './voronoi';
+import { Chunk } from './world/chunk';
 
 // Utility function to find neighboring sites
 export function getNeighboringSites(site: Site): Site[] {
@@ -26,6 +27,7 @@ interface VoronoiImageConfig {
   siteRadius?: number;
   showSites?: boolean;
   showEdges?: boolean;
+  showCenter?: boolean;
   fillCells?: boolean;
   worldToImageSpace?: (point: { x: number; y: number }) => [number, number];
 }
@@ -49,6 +51,7 @@ export async function generateCustomVoronoiPNG(
     siteRadius = 3,
     showSites = true,
     showEdges = true,
+    showCenter = false,
     fillCells = true,
     worldToImageSpace = (point) => [point.x, point.y],
   } = config;
@@ -108,7 +111,18 @@ export async function generateCustomVoronoiPNG(
     ctx.fillStyle = siteColor;
     sites.forEach(site => {
       ctx.beginPath();
-      ctx.arc(...worldToImageSpace(site.center), siteRadius, 0, 2 * Math.PI);
+      ctx.arc(...worldToImageSpace(site.location), siteRadius, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+  }
+
+  // Draw site centers if requested
+  if (showCenter) {
+    ctx.fillStyle = '#00000066';
+    sites.forEach(site => {
+      const center = Chunk.computeSiteCenter(site);
+      ctx.beginPath();
+      ctx.arc(...worldToImageSpace(center), siteRadius / 2, 0, 2 * Math.PI);
       ctx.fill();
     });
   }

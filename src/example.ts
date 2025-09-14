@@ -25,7 +25,7 @@ export async function example() {
     // Print information about each site
     sites.forEach((site, index) => {
       console.log(`Site ${index}:`);
-      console.log(`  Center: (${site.center.x}, ${site.center.y})`);
+      console.log(`  Location: (${site.location.x}, ${site.location.y})`);
       console.log(`  Number of edges: ${site.edges.length}`);
 
       // Print neighbors

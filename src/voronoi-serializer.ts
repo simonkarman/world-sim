@@ -2,7 +2,7 @@ import { HalfEdge, Site } from './voronoi';
 
 export type SerializableHalfEdge = [/*id*/number, /*from.x*/number, /*from.y*/number] | [number, number, number, /*oppositeId*/number];
 export type SerializableSite = {
-  c: [number, number];
+  l: [number, number];
   e: SerializableHalfEdge[];
 };
 
@@ -10,7 +10,7 @@ export class VoronoiSerializer {
 
   serialize(sites: Site[]): SerializableSite[] {
     return sites.map(site => ({
-      c: [site.center.x, site.center.y],
+      l: [site.location.x, site.location.y],
       e: site.edges.map(edge => {
         const s = [edge.id, edge.from.x, edge.from.y] as SerializableHalfEdge;
         if (edge.opposite !== undefined) {
@@ -27,7 +27,7 @@ export class VoronoiSerializer {
     const sites = serializedSites.map(serializedSite => {
       // Create the site
       const site: Site = {
-        center: { x: serializedSite.c[0], y: serializedSite.c[1] },
+        location: { x: serializedSite.l[0], y: serializedSite.l[1] },
         edges: [],
       };
 
