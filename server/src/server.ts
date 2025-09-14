@@ -77,7 +77,12 @@ krmxServer.on('join', (username) => {
     location: { x: 0, y: 0 },
     loadedChunkKeys: [],
   };
+});
+krmxServer.on('link', (username) => {
   reloadChunks(username);
+});
+krmxServer.on('unlink', (username) => {
+  users[username].loadedChunkKeys = [];
 });
 krmxServer.on('message', (username, message) => {
   if (message.type === 'user/move') {
