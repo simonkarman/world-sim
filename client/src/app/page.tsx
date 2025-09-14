@@ -1,4 +1,4 @@
-import { World } from '@/component/world';
+import { Login } from '@/component/login';
 
 export default function Home() {
   return <>
@@ -6,6 +6,6 @@ export default function Home() {
       <h1 className="font-bold text-xl">World Sim</h1>
       <p className="text-gray-500">Welcome, to the world sim app!</p>
     </div>
-    <World />
+    <Login />
   </>;
 }
