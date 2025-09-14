@@ -87,8 +87,7 @@ export class Chunk {
     return this.asCache('sites', () => {
       const points = this.flatMapSurroundings(c => c.getLloydRelaxedPoints());
       return voronoi(points, [this.x - 1, this.y - 1, 3, 3]).filter(site => {
-        // TODO: once chunks are rendered client side, we should no longer render sites in neighboring chunks
-        return true; //this.isInside(site.location);
+        return this.isInside(site.location);
       });
     });
   }
