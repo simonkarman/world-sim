@@ -9,7 +9,6 @@ import { createServer } from '@krmx/server';
 import { Point } from './voronoi/voronoi';
 import { VoronoiSerializer } from './voronoi/voronoi-serializer';
 
-const world = new World(process.env.WORLD_SEED ?? 'abc');
 const voronoiSerializer = new VoronoiSerializer();
 
 // Create http server
@@ -28,21 +27,26 @@ krmxServer.on('listen', () => {
   console.info(`Server is running on port ${address.port}`);
 });
 
+// The world!
+const world = new World('abc', 20, 2);
+
 // Track users and stream their location and loaded chunks
 interface UserData {
   location: Point;
   loadedChunkKeys: `${number}/${number}`[];
 }
 const users: { [username: string]: UserData } = {};
+
 const reloadChunks = (username: string) => {
   const user = users[username];
 
-  // Determine which chunks should be loaded (3x3 grid around user)
+  // Determine which chunks should be loaded (AxA grid around user)
   const baseX = Math.floor(user.location.x);
   const baseY = Math.floor(user.location.y);
   const expectedChunks: `${number}/${number}`[] = [];
-  for (let dx = -1; dx <= 1; dx++) {
-    for (let dy = -1; dy <= 1; dy++) {
+  const a = 2;
+  for (let dx = -a; dx <= a; dx++) {
+    for (let dy = -a; dy <= a; dy++) {
       expectedChunks.push(`${baseX + dx}/${baseY + dy}`);
     }
   }

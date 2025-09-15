@@ -9,6 +9,7 @@ export function Connect(props: {
   username: string,
   failure: (reason: string) => void,
 }) {
+  const { username, failure } = props;
   const clientRef = useRef<Client>(null);
   const [isLinked, setIsLinked] = useState(false);
   const [chunks, setChunks] = useState<Chunk[]>([]);
@@ -25,12 +26,12 @@ export function Connect(props: {
       setUserLocations(prev => ({ ...prev, [username]: { x: 0, y: 0 } }));
     });
     client.on('link', (username) => {
-      if (username === props.username) {
+      if (username === username) {
         setIsLinked(true);
       }
     });
     client.on('unlink', (username) => {
-      if (username === props.username) {
+      if (username === username) {
         setIsLinked(false);
         setChunks([]);
       }
@@ -63,9 +64,9 @@ export function Connect(props: {
     const _ = async () => {
       await client.connect('http://localhost:8000/krmx');
       try {
-        await client.link(props.username);
+        await client.link(username);
       } catch (e) {
-        props.failure(
+        failure(
           e && typeof e === 'object' && 'message' in e && typeof e.message === 'string'
             ? e.message
             : 'unknown error',
@@ -77,11 +78,11 @@ export function Connect(props: {
     return () => {
       clientRef.current?.disconnect(true);
     };
-  }, [props.username]);
+  }, [username, failure]);
 
   if (isLinked) {
     return <World
-      username={props.username}
+      username={username}
       userLocations={userLocations}
       chunks={chunks}
       move={(point) => clientRef.current?.send({ type: 'user/move', payload: point })}

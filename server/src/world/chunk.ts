@@ -44,7 +44,7 @@ export class Chunk {
     return this.asCache('rawPoints', () => {
       const r = Random.fromSeed(`${this.world.seed}/chunk_${this.x}_${this.y}`);
       const points: Point[] = [];
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < this.world.pointsPerChunk; i++) {
         points.push({
           x: this.x + r.next(),
           y: this.y + r.next(),
@@ -73,8 +73,7 @@ export class Chunk {
     return this.asCache('lloydRelaxedPoints', () => {
       let points = this.flatMapSurroundings(c => c.getRawPoints());
 
-      const iterations = 2;
-      for (let i = 0; i < iterations; i++) {
+      for (let i = 0; i < this.world.lloydRelaxationIterations; i++) {
         const diagram = voronoi(points);
         points = diagram.map(s => Chunk.computeSiteCenter(s));
       }
