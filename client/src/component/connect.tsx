@@ -22,24 +22,25 @@ export function Connect(props: {
     const client = createClient();
     clientRef.current = client;
 
-    client.on('join', username => {
-      setUserLocations(prev => ({ ...prev, [username]: { x: 0, y: 0 } }));
+    client.on('join', _username => {
+      setUserLocations(prev => ({ ...prev, [_username]: { x: 0, y: 0 } }));
     });
-    client.on('link', (username) => {
-      if (username === username) {
+    client.on('link', (_username) => {
+      if (username === _username) {
         setIsLinked(true);
       }
     });
-    client.on('unlink', (username) => {
-      if (username === username) {
+    client.on('unlink', (_username) => {
+      if (username === _username) {
         setIsLinked(false);
         setChunks([]);
+        setUserLocations({});
       }
     });
-    client.on('leave', (username) => {
+    client.on('leave', (_username) => {
       setUserLocations(prev => {
         const copy = { ...prev };
-        delete copy[username];
+        delete copy[_username];
         return copy;
       });
     });
@@ -62,7 +63,7 @@ export function Connect(props: {
     });
 
     const _ = async () => {
-      await client.connect('http://localhost:8000/krmx');
+      await client.connect(`http://${window.location.hostname}:8000/krmx`);
       try {
         await client.link(username);
       } catch (e) {
