@@ -95,7 +95,7 @@ export function World(props: {
             x={2} y={-2}
             fontSize={5} fill="black"
           >
-            {name}
+            {name[0].toUpperCase() + name.slice(1)}
           </text>
         </TransformAnimatedSvgGroup>
       ))}
